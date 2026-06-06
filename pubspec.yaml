@@ -12,8 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  appwrite: ^13.0.0
-
   cupertino_icons: ^1.0.8
 
   lottie: ^3.1.2
