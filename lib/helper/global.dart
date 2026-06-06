@@ -7,3 +7,4 @@ late Size mq;
 String apiKey = '';
 String claudeKey = '';
 String groqKey = '';
+String deepseekKey = '';
