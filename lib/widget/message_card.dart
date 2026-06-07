@@ -1,6 +1,6 @@
-import '../main.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../helper/global.dart';
 import '../model/message.dart';
@@ -12,67 +12,87 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const r = Radius.circular(15);
-
     return message.msgType == MessageType.bot
-        ? Row(children: [
-            const SizedBox(width: 6),
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white,
-              child: Image.asset('assets/images/logo.png', width: 24),
+        ? _BotMessage(message: message)
+        : _UserMessage(message: message);
+  }
+}
+
+class _UserMessage extends StatelessWidget {
+  final Message message;
+  const _UserMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            constraints: BoxConstraints(maxWidth: mq.width * .75),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEEE),
+              borderRadius: BorderRadius.circular(24),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (message.aiProvider != null)
-                  Padding(
-                    padding: EdgeInsets.only(left: mq.width * .02, bottom: 4),
-                    child: _ProviderChip(provider: message.aiProvider!),
+            child: Text(
+              message.msg,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: Colors.black87,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BotMessage extends StatelessWidget {
+  final Message message;
+  const _BotMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (message.aiProvider != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _ProviderChip(provider: message.aiProvider!),
+            ),
+          message.msg.isEmpty
+              ? AnimatedTextKit(
+                  animatedTexts: [
+                    TypewriterAnimatedText(
+                      'Aguarde...',
+                      textStyle: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Colors.grey,
+                        height: 1.5,
+                      ),
+                      speed: const Duration(milliseconds: 80),
+                    ),
+                  ],
+                  repeatForever: true,
+                )
+              : Text(
+                  message.msg,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: Colors.black87,
+                    height: 1.6,
                   ),
-                Container(
-                  constraints: BoxConstraints(maxWidth: mq.width * .6),
-                  margin: EdgeInsets.only(
-                      bottom: mq.height * .02, left: mq.width * .02),
-                  padding: EdgeInsets.symmetric(
-                      vertical: mq.height * .01, horizontal: mq.width * .02),
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).lightTextColor),
-                      borderRadius: const BorderRadius.only(
-                          topLeft: r, topRight: r, bottomRight: r)),
-                  child: message.msg.isEmpty
-                      ? AnimatedTextKit(animatedTexts: [
-                          TypewriterAnimatedText(
-                            ' Please wait... ',
-                            speed: const Duration(milliseconds: 100),
-                          ),
-                        ], repeatForever: true)
-                      : Text(message.msg, textAlign: TextAlign.center),
                 ),
-              ],
-            )
-          ])
-        : Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            Container(
-                constraints: BoxConstraints(maxWidth: mq.width * .6),
-                margin: EdgeInsets.only(
-                    bottom: mq.height * .02, right: mq.width * .02),
-                padding: EdgeInsets.symmetric(
-                    vertical: mq.height * .01, horizontal: mq.width * .02),
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Theme.of(context).lightTextColor),
-                    borderRadius: const BorderRadius.only(
-                        topLeft: r, topRight: r, bottomLeft: r)),
-                child: Text(message.msg, textAlign: TextAlign.center)),
-            const CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.blue),
-            ),
-            const SizedBox(width: 6),
-          ]);
+        ],
+      ),
+    );
   }
 }
 
@@ -83,31 +103,33 @@ class _ProviderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final map = {
-      'Gemini':  (const Color(0xFF4285F4), '⚡'),
-      'Claude':  (const Color(0xFFF97316), '🧠'),
-      'ChatGPT': (const Color(0xFF10B981), '💻'),
-      'XiaoAI':  (const Color(0xFFFF6B35), '🤖'),
+      'Gemini':   (const Color(0xFF4285F4), '⚡'),
+      'Llama':    (const Color(0xFF6B8EFF), '🦙'),
+      'Mixtral':  (const Color(0xFF10B981), '🌀'),
+      'Gemma':    (const Color(0xFF34A853), '💎'),
+      'Groq':     (const Color(0xFF6B8EFF), '⚡'),
+      'Claude':   (const Color(0xFFF97316), '🧠'),
+      'DeepSeek': (const Color(0xFF8B5CF6), '🔍'),
     };
 
     final entry = map[provider];
     final color = entry?.$1 ?? Colors.grey;
     final icon  = entry?.$2 ?? '🤖';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        border: Border.all(color: color.withOpacity(0.4)),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        '$icon $provider',
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
-          fontWeight: FontWeight.w600,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(icon, style: const TextStyle(fontSize: 13)),
+        const SizedBox(width: 4),
+        Text(
+          provider,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
+      ],
     );
   }
 }
